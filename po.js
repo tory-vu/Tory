@@ -371,3 +371,27 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+function switchDetailAsset(element) {
+    // 1. Đổi ảnh lớn (nếu code cũ của bạn đã có dòng tương tự thì giữ nguyên)
+    const mainImg = document.getElementById('main-detail-img');
+    if (mainImg) {
+        mainImg.src = element.src;
+    }
+
+    // 2. Lấy dữ liệu chữ từ ảnh thumbnail vừa bấm
+    const newTitle = element.getAttribute('data-title');
+    const newDesc = element.getAttribute('data-desc');
+    const newTech = element.getAttribute('data-tech');
+
+    // 3. Thay chữ vào cột bên phải
+    if (newTitle) document.getElementById('detail-title').textContent = newTitle;
+    if (newDesc) document.getElementById('detail-desc').textContent = newDesc;
+    if (newTech) document.getElementById('detail-tech').textContent = newTech;
+
+    // 4. Đổi trạng thái active cho thumbnail
+    document.querySelectorAll('.detail-thumb-node').forEach(node => {
+        node.classList.remove('active');
+    });
+    element.classList.add('active');
+}
