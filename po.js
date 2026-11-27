@@ -443,3 +443,36 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+
+// 1. Khóa mọi lệnh scrollIntoView từ code cũ
+Element.prototype.scrollIntoView = function() {};
+
+// 2. Chặn đứng sự kiện phím mũi tên ở cấp cao nhất trước khi code cũ kịp chạy
+window.addEventListener('keydown', function(e) {
+    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+        e.preventDefault();
+        e.stopImmediatePropagation(); // Cắt đứt mọi sự kiện keydown khác trên trang
+
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+            const thumbs = Array.from(document.querySelectorAll('.dynamic-thumb'));
+            const activeIndex = thumbs.findIndex(img => img.classList.contains('active'));
+            if (activeIndex === -1) return;
+
+            const nextIndex = e.key === 'ArrowRight'
+                ? (activeIndex + 1) % thumbs.length
+                : (activeIndex - 1 + thumbs.length) % thumbs.length;
+
+            // Gọi click trực tiếp hoặc đổi ảnh thủ công
+            const targetThumb = thumbs[nextIndex];
+            const wrapper = targetThumb.closest('.dynamic-img-box').parentElement;
+            
+            wrapper.querySelector('.dynamic-main-img').src = targetThumb.src;
+            wrapper.querySelector('.dynamic-title').textContent = targetThumb.dataset.title;
+            wrapper.querySelector('.dynamic-desc').textContent = targetThumb.dataset.desc;
+
+            thumbs.forEach(img => img.classList.remove('active'));
+            targetThumb.classList.add('active');
+        }
+    }
+}, true); // Tham số true giúp bắt sự kiện sớm nhất có thể
