@@ -1042,3 +1042,62 @@ div[style*="position: fixed"][style*="z-index: 999999"] {
     border-color: #000000;      /* Đường viền đơn màu đen sắc sảo giống ảnh mẫu menu */
     transform: translateY(-3px);/* Nhấc nhẹ nút lên khi di chuột vào */
 }
+
+
+
+/* 1. Khung chia 2 cột trái - phải */
+.detail-workspace,
+.dynamic-workspace {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+    width: 100%;
+}
+
+/* 2. Cột bên trái (khung nền đen chứa ảnh) */
+.img-box,
+.dynamic-img-box {
+    flex: 1;
+    min-width: 0;
+    background-color: #000;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+/* 3. Ảnh lớn bên trong cột trái (CỰC KỲ QUAN TRỌNG để ảnh không bị phình to) */
+.img-box > img,
+.dynamic-img-box > img,
+.dynamic-main-img {
+    width: 100%;
+    height: auto;
+    max-height: 450px;
+    object-fit: contain;
+    display: block;
+    margin-bottom: 12px;
+}
+
+/* 4. Các ảnh nhỏ (thumbnail) bên dưới */
+.detail-thumb-node,
+.dynamic-thumb {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    cursor: pointer;
+    opacity: 0.6;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.detail-thumb-node.active,
+.dynamic-thumb.active {
+    opacity: 1;
+    border-color: #fff;
+}
+
+/* 5. Cột chữ bên phải */
+.info-box-right,
+.dynamic-info-box {
+    flex: 1;
+    min-width: 0;
+    color: #fff;
+}

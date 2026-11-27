@@ -300,3 +300,146 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+function switchSeriesAsset(thumbElement) {
+    const workspace = thumbElement.closest('.dynamic-workspace');
+    if (!workspace) return;
+
+    // 1. Đổi ảnh lớn
+    const mainImg = workspace.querySelector('.dynamic-main-img');
+    if (mainImg) {
+        mainImg.src = thumbElement.src;
+    }
+
+    // 2. Đổi tiêu đề và đoạn văn bên phải
+    const titleEl = workspace.querySelector('.dynamic-title');
+    const descEl = workspace.querySelector('.dynamic-desc');
+
+    if (titleEl && thumbElement.hasAttribute('data-title')) {
+        titleEl.textContent = thumbElement.getAttribute('data-title');
+    }
+    if (descEl && thumbElement.hasAttribute('data-desc')) {
+        descEl.textContent = thumbElement.getAttribute('data-desc');
+    }
+
+    // 3. Đổi viền sáng của ảnh nhỏ đang chọn
+    const allThumbs = workspace.querySelectorAll('.dynamic-thumb');
+    allThumbs.forEach(item => item.classList.remove('active'));
+    thumbElement.classList.add('active');
+    thumbElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+
+
+// ========================================================
+// BIẾN LƯU KHỐI DYNAMIC ĐANG ĐƯỢC THAO TÁC
+// ========================================================
+let activeDynamicWorkspace = null;
+
+// ========================================================
+// HÀM ĐỔI ẢNH VÀ ĐỔI THÔNG TIN CHỮ CHO KHỐI DYNAMIC
+// ========================================================
+function switchSeriesAsset(clickedThumb) {
+    if (!clickedThumb) return;
+
+    // 1. Tìm đúng khối .dynamic-workspace chứa ảnh vừa bấm
+    const workspace = clickedThumb.closest('.dynamic-workspace');
+    if (!workspace) return;
+
+    // Cập nhật khối này làm tiêu điểm cho bàn phím
+    activeDynamicWorkspace = workspace;
+
+    // 2. Lấy ảnh lớn, tiêu đề và đoạn văn bản bên trong khối đó
+    const mainView = workspace.querySelector('.dynamic-main-img');
+    const titleNode = workspace.querySelector('.dynamic-title');
+    const textNode = workspace.querySelector('.dynamic-desc');
+    const allThumbs = workspace.querySelectorAll('.dynamic-thumb');
+
+    if (!mainView) return;
+
+    // 3. Xóa trạng thái active của các ảnh nhỏ cũ
+    allThumbs.forEach(img => {
+        img.classList.remove('active');
+    });
+
+    // 4. Hiệu ứng mờ chuyển ảnh mượt mà
+    mainView.style.transition = "opacity 0.12s ease";
+    mainView.style.opacity = "0.3";
+
+    setTimeout(() => {
+        // Đổi ảnh lớn
+        mainView.src = clickedThumb.src;
+        mainView.style.opacity = "1";
+        clickedThumb.classList.add('active');
+
+        // Đổi tiêu đề và nội dung mô tả từ data-title & data-desc
+        const newTitle = clickedThumb.getAttribute('data-title');
+        const newDesc = clickedThumb.getAttribute('data-desc');
+
+        if (titleNode && newTitle) {
+            titleNode.innerText = newTitle;
+        }
+        if (textNode && newDesc) {
+            textNode.innerText = newDesc;
+        }
+
+        // Cuộn thanh thumbnail đưa ảnh đang chọn ra giữa
+        clickedThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }, 120);
+}
+
+// ========================================================
+// HÀM LẬT ẢNH BẰNG PHÍM MŨI TÊN / A / D CHO KHỐI DYNAMIC
+// ========================================================
+function updateDynamicGallery(isNext) {
+    if (!activeDynamicWorkspace) {
+        activeDynamicWorkspace = document.querySelector('.dynamic-workspace');
+    }
+    if (!activeDynamicWorkspace) return;
+
+    const thumbs = Array.from(activeDynamicWorkspace.querySelectorAll('.dynamic-thumb'));
+    if (thumbs.length === 0) return;
+
+    let currentIndex = thumbs.findIndex(img => img.classList.contains('active'));
+    if (currentIndex === -1) currentIndex = 0;
+
+    let nextIndex = isNext
+        ? (currentIndex + 1) % thumbs.length
+        : (currentIndex - 1 + thumbs.length) % thumbs.length;
+
+    switchSeriesAsset(thumbs[nextIndex]);
+}
+
+// Lắng nghe phím bấm riêng cho khối .dynamic-workspace
+document.addEventListener('keydown', function(event) {
+    if (activeDynamicWorkspace) {
+        if (event.key === 'ArrowRight' || event.key === 'd' || event.key === 'D') {
+            event.preventDefault();
+            updateDynamicGallery(true);
+        } else if (event.key === 'ArrowLeft' || event.key === 'a' || event.key === 'A') {
+            event.preventDefault();
+            updateDynamicGallery(false);
+        }
+    }
+});
+
+// Khởi tạo theo dõi hover và cuộn trang cho các khối .dynamic-workspace
+document.addEventListener('DOMContentLoaded', () => {
+    const dynamicBlocks = document.querySelectorAll('.dynamic-workspace');
+
+    dynamicBlocks.forEach(block => {
+        const firstThumb = block.querySelector('.dynamic-thumb');
+        if (firstThumb) {
+            firstThumb.classList.add('active');
+        }
+
+        // Di chuột vào khối nào thì bàn phím điều khiển khối đó
+        block.addEventListener('mouseenter', () => {
+            activeDynamicWorkspace = block;
+        });
+
+        // Rời chuột ra thì nhả tiêu điểm để không tranh chấp với khối Faye ở trên
+        block.addEventListener('mouseleave', () => {
+            activeDynamicWorkspace = null;
+        });
+    });
+});
